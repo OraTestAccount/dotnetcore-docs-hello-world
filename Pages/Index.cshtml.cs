@@ -20,20 +20,32 @@ public class IndexModel : PageModel
 
     public void OnGet()
     {      
-        string connectionString = Environment.GetEnvironmentVariable("StorageConnectionString");
-        string queueName = "sample-queue-testing"; 
-
-        // Instantiate a QueueClient which will be used to create and manipulate the queue
-        QueueClient queueClient = new QueueClient(connectionString, queueName);
-
-        // Ensure the queue exists
-        queueClient.CreateIfNotExists();
-
-        if (queueClient.Exists())
+        try
         {
-            // Create a message and add it to the queue
-            string message = "New homepage visit at " + DateTime.Now.ToString();
-            queueClient.SendMessage(message);
-        }  
+            string connectionString = Environment.GetEnvironmentVariable("StorageConnectionString");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Storage connection string is not configured.");
+            }
+
+            string queueName = "sample-queue-testing";
+
+            QueueClient queueClient = new QueueClient(connectionString, queueName);
+
+            queueClient.CreateIfNotExists();
+
+            if (queueClient.Exists())
+            {
+                string message = "New homepage visit at " + DateTime.Now.ToString();
+                queueClient.SendMessage(message);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it accordingly
+            Console.WriteLine($"An error occurred: {ex.Message}");
+            // Optionally, log the error to Application Insights or another logging service
+        } 
     }
 }
