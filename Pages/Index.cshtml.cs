@@ -17,6 +17,21 @@ public class IndexModel : PageModel
     }
 
     public void OnGet()
-    {        
+    {      
+        string connectionString = Environment.GetEnvironmentVariable("StorageConnectionString");
+        string queueName = "sample-queue-testing"; 
+
+        // Instantiate a QueueClient which will be used to create and manipulate the queue
+        QueueClient queueClient = new QueueClient(connectionString, queueName);
+
+        // Ensure the queue exists
+        queueClient.CreateIfNotExists();
+
+        if (queueClient.Exists())
+        {
+            // Create a message and add it to the queue
+            string message = "New homepage visit at " + DateTime.Now.ToString();
+            queueClient.SendMessage(message);
+        }  
     }
 }
