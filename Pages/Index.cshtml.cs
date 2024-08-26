@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Runtime.InteropServices;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 
 namespace dotnetcoresample.Pages;
 
