@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Runtime.InteropServices;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
+using System.Text;
 
 namespace dotnetcoresample.Pages;
 
@@ -36,14 +37,12 @@ public class IndexModel : PageModel
 
             queueClient.CreateIfNotExists();
 
-            bool queueExists = queueClient.Exists();
-            _logger.LogInformation("Queue client exists: {Exists}", queueExists);
-
-            if (queueExists)
+            if (queueClient.Exists())
             {
                 string message = "New homepage visit at " + DateTime.Now.ToString();
-                queueClient.SendMessage(message);
-                _logger.LogInformation("Message sent to queue: {Message}", message);
+                string base64Message = Convert.ToBase64String(Encoding.UTF8.GetBytes(message));
+                queueClient.SendMessage(base64Message);
+                _logger.LogInformation("Base64-encoded message sent to queue: {Message}", base64Message);
             }
         }
         catch (Exception ex)
