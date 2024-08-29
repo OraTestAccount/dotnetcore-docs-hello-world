@@ -8,8 +8,7 @@ namespace dotnetcoresample.Pages;
 
 public class IndexModel : PageModel
 {
-
-    public string OSVersion { get { return RuntimeInformation.OSDescription; }  }
+    public string OSVersion { get { return RuntimeInformation.OSDescription; } }
     
     private readonly ILogger<IndexModel> _logger;
 
@@ -22,6 +21,8 @@ public class IndexModel : PageModel
     {      
         try
         {
+            _logger.LogInformation("OnGet method called.");
+
             string connectionString = Environment.GetEnvironmentVariable("StorageConnectionString");
 
             if (string.IsNullOrEmpty(connectionString))
@@ -35,17 +36,19 @@ public class IndexModel : PageModel
 
             queueClient.CreateIfNotExists();
 
-            if (queueClient.Exists())
+            bool queueExists = queueClient.Exists();
+            _logger.LogInformation("Queue client exists: {Exists}", queueExists);
+
+            if (queueExists)
             {
                 string message = "New homepage visit at " + DateTime.Now.ToString();
                 queueClient.SendMessage(message);
+                _logger.LogInformation("Message sent to queue: {Message}", message);
             }
         }
         catch (Exception ex)
         {
-            // Log the exception or handle it accordingly
-            Console.WriteLine($"An error occurred: {ex.Message}");
-            // Optionally, log the error to Application Insights or another logging service
+            _logger.LogError(ex, "An error occurred while trying to send a message to the queue.");
         } 
     }
 }
